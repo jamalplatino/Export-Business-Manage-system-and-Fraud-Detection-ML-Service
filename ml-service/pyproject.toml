@@ -1,0 +1,38 @@
+[project]
+name = "fraud-ml-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "j", email = "jamalplatino01@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.1.1",
+    "fastapi>=0.141.1",
+    "pandas>=3.0.6",
+    "psycopg[binary]>=3.3.6",
+    "scikit-learn>=1.9.1",
+    "torch>=2.14.0",
+    "uvicorn>=0.53.0",
+]
+
+[project.scripts]
+fraud-ml-service = "fraud_ml_service:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv]
+package = false
+

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Shipment {{ shipment.tracking_number }}{% endblock %}
+
+{% block content %}
+<h1>Shipment {{ shipment.tracking_number }}</h1>
+<p><a href="{% url 'shipment_list' %}">← Back to shipments</a></p>
+
+<table>
+    <tr><th>Invoice</th>
+        <td><a href="{% url 'invoice_detail' shipment.invoice.pk %}">{{ shipment.invoice.number }}</a></td></tr>
+    <tr><th>Customer</th>
+        <td><a href="{% url 'customer_detail' shipment.invoice.customer.pk %}">{{ shipment.invoice.customer.name }}</a></td></tr>
+    <tr><th>Carrier</th><td>{{ shipment.carrier }}</td></tr>
+    <tr><th>Status</th><td>{{ shipment.get_status_display }}</td></tr>
+    <tr><th>Shipped date</th><td>{{ shipment.shipped_date|default:"—" }}</td></tr>
+    <tr><th>Delivered date</th><td>{{ shipment.delivered_date|default:"—" }}</td></tr>
+</table>
+{% endblock %}

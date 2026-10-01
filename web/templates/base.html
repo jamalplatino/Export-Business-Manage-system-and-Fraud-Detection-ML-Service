@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Export & Billing{% endblock %}</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+        nav { background: #1f2937; color: white; padding: 12px 24px; display: flex; gap: 20px; }
+        nav a { color: white; text-decoration: none; opacity: 0.85; }
+        nav a:hover { opacity: 1; }
+        main { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f3f4f6; }
+        .btn { display: inline-block; padding: 8px 14px; background: #2563eb; color: white;
+               text-decoration: none; border-radius: 6px; border: none; cursor: pointer; }
+        .btn:hover { background: #1d4ed8; }
+        .messages { margin-bottom: 16px; }
+        .message { padding: 10px; border-radius: 6px; background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <nav>
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <a href="{% url 'customer_list' %}">Customers</a>
+    <a href="{% url 'invoice_list' %}">Invoices</a>
+    <a href="{% url 'shipment_list' %}">Shipments</a>
+    <a href="{% url 'payment_list' %}">Payments</a>
+    <span style="flex:1;"></span>
+    {% if user.is_authenticated %}
+        <span style="opacity:0.7;">{{ user.username }} ({{ user.profile.get_role_display }})</span>
+        <a href="{% url 'profile' %}">Profile</a>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" style="background:none;border:none;color:white;cursor:pointer;opacity:0.85;">
+                Logout
+            </button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Sign up</a>
+    {% endif %}
+    </nav>
+    <main>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

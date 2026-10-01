@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Payment {{ payment.reference }}{% endblock %}
+
+{% block content %}
+<h1>Payment {{ payment.reference }}</h1>
+<p><a href="{% url 'payment_list' %}">← Back to payments</a></p>
+
+<table>
+    <tr><th>Invoice</th>
+        <td><a href="{% url 'invoice_detail' payment.invoice.pk %}">{{ payment.invoice.number }}</a></td></tr>
+    <tr><th>Customer</th>
+        <td><a href="{% url 'customer_detail' payment.invoice.customer.pk %}">{{ payment.invoice.customer.name }}</a></td></tr>
+    <tr><th>Amount</th><td>{{ payment.amount }} {{ payment.invoice.currency }}</td></tr>
+    <tr><th>Method</th><td>{{ payment.get_method_display }}</td></tr>
+    <tr><th>Reference</th><td>{{ payment.reference }}</td></tr>
+    <tr><th>Paid At</th><td>{{ payment.paid_at|date:"Y-m-d H:i" }}</td></tr>
+</table>
+{% endblock %}

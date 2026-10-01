@@ -1,0 +1,118 @@
+services:
+  db:
+    image: postgres:16-alpine  
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - app-net
+
+  ml-service:
+    build: ./ml-service
+    ports:
+      - "8002:8002"
+    networks:
+      - app-net
+
+  web:
+    build: ./web
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./web:/app
+      - web_venv:/app/.venv
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ML_SERVICE_URL: http://ml-service:8002
+      OLLAMA_HOST: http://host.docker.internal:11434
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-net
+
+  celery-worker:
+    build: ./web
+    command: uv run celery -A config worker --loglevel=info
+    volumes:
+      - ./web:/app
+      - web_venv:/app/.venv
+    env_file: .env
+    environment:
+      DB_HOST: db
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      ML_SERVICE_URL: http://ml-service:8002
+      OLLAMA_HOST: http://host.docker.internal:11434
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-net
+
+  celery-beat:
+    build: ./web
+    command: uv run celery -A config beat --loglevel=info
+    volumes:
+      - ./web:/app
+      - web_venv:/app/.venv
+    env_file: .env
+    environment:
+      DB_HOST: db
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - app-net
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  web_venv:
+
+networks:
+  app-net:
+    driver: bridge

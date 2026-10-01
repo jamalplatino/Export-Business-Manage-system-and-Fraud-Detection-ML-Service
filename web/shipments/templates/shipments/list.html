@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Shipments{% endblock %}
+
+{% block content %}
+<h1>Shipments</h1>
+<p><a class="btn" href="{% url 'shipment_create' %}">+ New shipment</a></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tracking</th><th>Invoice</th><th>Customer</th>
+            <th>Carrier</th><th>Status</th><th>Shipped</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in shipments %}
+        <tr>
+            <td><a href="{% url 'shipment_detail' s.pk %}">{{ s.tracking_number }}</a></td>
+            <td>{{ s.invoice.number }}</td>
+            <td>{{ s.invoice.customer.name }}</td>
+            <td>{{ s.carrier }}</td>
+            <td>{{ s.get_status_display }}</td>
+            <td>{{ s.shipped_date|date:"Y-m-d"|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No shipments yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Shipment{% endblock %}
+
+{% block content %}
+<h1>{{ action }} Shipment</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <p>
+        <label>Invoice *<br>
+        <select name="invoice" required style="width:100%;padding:8px;">
+            <option value="">— choose an invoice —</option>
+            {% for i in invoices %}
+                <option value="{{ i.pk }}">{{ i.number }} — {{ i.customer.name }}</option>
+            {% endfor %}
+        </select></label>
+    </p>
+
+    <p>
+        <label>Tracking number *<br>
+        <input type="text" name="tracking_number" required style="width:100%;padding:8px;"></label>
+    </p>
+
+    <p>
+        <label>Carrier *<br>
+        <input type="text" name="carrier" required style="width:100%;padding:8px;"></label>
+    </p>
+
+    <p>
+        <label>Status<br>
+        <select name="status" style="width:100%;padding:8px;">
+            {% for value, label in status_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select></label>
+    </p>
+
+    <p>
+        <label>Shipped date<br>
+        <input type="date" name="shipped_date" style="width:100%;padding:8px;"></label>
+    </p>
+
+    <p>
+        <label>Delivered date<br>
+        <input type="date" name="delivered_date" style="width:100%;padding:8px;"></label>
+    </p>
+
+    <button class="btn" type="submit">Save</button>
+    <a href="{% url 'shipment_list' %}">Cancel</a>
+</form>
+{% endblock %}

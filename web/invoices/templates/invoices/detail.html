@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.number }}{% endblock %}
+
+{% block content %}
+<h1>Invoice {{ invoice.number }}</h1>
+<p><a href="{% url 'invoice_list' %}">← Back to invoices</a></p>
+
+<table>
+    <tr><th>Customer</th>
+        <td><a href="{% url 'customer_detail' invoice.customer.pk %}">{{ invoice.customer.name }}</a></td></tr>
+    <tr><th>Amount</th><td>{{ invoice.amount }} {{ invoice.currency }}</td></tr>
+    <tr><th>Status</th><td>{{ invoice.get_status_display }}</td></tr>
+    <tr><th>Issued</th><td>{{ invoice.issued_date|date:"Y-m-d" }}</td></tr>
+    <tr><th>Due</th><td>{{ invoice.due_date|date:"Y-m-d" }}</td></tr>
+</table>
+
+<h2>Shipments</h2>
+{% if invoice.shipments.all %}
+    <table>
+        <tr><th>Tracking</th><th>Carrier</th><th>Status</th></tr>
+        {% for s in invoice.shipments.all %}
+        <tr>
+            <td>{{ s.tracking_number }}</td>
+            <td>{{ s.carrier }}</td>
+            <td>{{ s.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No shipments yet.</p>
+{% endif %}
+
+<h2>Payments</h2>
+{% if invoice.payments.all %}
+    <table>
+        <tr><th>Amount</th><th>Method</th><th>Paid at</th></tr>
+        {% for p in invoice.payments.all %}
+        <tr>
+            <td>{{ p.amount }}</td>
+            <td>{{ p.get_method_display }}</td>
+            <td>{{ p.paid_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No payments yet.</p>
+{% endif %}
+{% endblock %}

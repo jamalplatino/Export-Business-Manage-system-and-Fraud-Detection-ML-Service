@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Total invoiced</div>
+        <div style="font-size:22px;font-weight:600;">{{ total_invoiced }}</div>
+    </div>
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Total paid</div>
+        <div style="font-size:22px;font-weight:600;color:#059669;">{{ total_paid }}</div>
+    </div>
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Outstanding</div>
+        <div style="font-size:22px;font-weight:600;color:#dc2626;">{{ outstanding }}</div>
+    </div>
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Overdue</div>
+        <div style="font-size:22px;font-weight:600;">{{ overdue_count }}</div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Customers</div>
+        <div style="font-size:20px;font-weight:600;">{{ customer_count }}</div>
+    </div>
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Shipments</div>
+        <div style="font-size:20px;font-weight:600;">{{ shipment_count }}</div>
+    </div>
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <div style="color:#6b7280;font-size:13px;">Unpaid invoices</div>
+        <div style="font-size:20px;font-weight:600;">{{ unpaid_count }}</div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <h3>Revenue (last 30 days)</h3>
+        <canvas id="revenueChart" height="100"></canvas>
+    </div>
+    <div style="background:white;padding:16px;border-radius:8px;">
+        <h3>Invoices by status</h3>
+        <canvas id="statusChart" height="200"></canvas>
+    </div>
+</div>
+
+<div style="background:white;padding:16px;border-radius:8px;">
+    <h3>Top 5 customers by invoiced amount</h3>
+    <table>
+        <thead>
+            <tr><th>Customer</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+            {% for c in top_customers %}
+            <tr>
+                <td><a href="{% url 'customer_detail' c.pk %}">{{ c.name }}</a></td>
+                <td>{{ c.total }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No data yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Revenue line chart
+    const revenueCtx = document.getElementById('revenueChart');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ revenue_labels|safe }},
+            datasets: [{
+                label: 'Revenue',
+                data: {{ revenue_values|safe }},
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37,99,235,0.1)',
+                fill: true,
+                tension: 0.3,
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Invoices by status pie chart
+    const statusCtx = document.getElementById('statusChart');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ status_labels|safe }},
+            datasets: [{
+                data: {{ status_values|safe }},
+                backgroundColor: ['#9ca3af', '#2563eb', '#059669', '#dc2626'],
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+{% endblock %}

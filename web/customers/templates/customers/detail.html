@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block content %}
+<h1>{{ customer.name }}</h1>
+<p><a href="{% url 'customer_list' %}">← Back to customers</a></p>
+
+<table>
+    <tr><th>Email</th><td>{{ customer.email }}</td></tr>
+    <tr><th>Phone</th><td>{{ customer.phone|default:"—" }}</td></tr>
+    <tr><th>Country</th><td>{{ customer.country }}</td></tr>
+    <tr><th>Created</th><td>{{ customer.created_at|date:"Y-m-d H:i" }}</td></tr>
+</table>
+
+<h2>Invoices</h2>
+{% if customer.invoices.all %}
+    <table>
+        <tr><th>Number</th><th>Amount</th><th>Status</th><th>Due</th></tr>
+        {% for inv in customer.invoices.all %}
+        <tr>
+            <td>{{ inv.number }}</td>
+            <td>{{ inv.amount }} {{ inv.currency }}</td>
+            <td>{{ inv.get_status_display }}</td>
+            <td>{{ inv.due_date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No invoices yet.</p>
+{% endif %}
+
+<h2>Notes</h2>
+{% for note in customer.notes.all %}
+    <div style="background:white;padding:10px;border-radius:6px;margin-bottom:8px;">
+        <small>{{ note.created_at|date:"Y-m-d H:i" }}{% if note.created_by %} — {{ note.created_by }}{% endif %}</small>
+        <p>{{ note.body }}</p>
+        {% if note.metadata %}
+            <pre style="background:#f3f4f6;padding:8px;border-radius:4px;">{{ note.metadata }}</pre>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No notes yet.</p>
+{% endfor %}
+{% endblock %}

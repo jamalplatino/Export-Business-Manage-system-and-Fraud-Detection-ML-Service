@@ -1,0 +1,13 @@
+.env
+web/.env
+
+
+
+.venv/
+venv/
+
+
+
+ml-service/.venv
+langchain-demo/.venv
+web/.venv
