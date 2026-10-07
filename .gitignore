@@ -1,11 +1,11 @@
 .env
 web/.env
-
+ml-service/.env
+langchain-demo/.env
 
 
 .venv/
 venv/
-
 
 
 ml-service/.venv
