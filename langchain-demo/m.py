@@ -1,6 +1,6 @@
 from typing import Annotated, TypedDict
 from langchain_core.tools import tool
-from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.messages import HumanMessage, ToolMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
@@ -42,6 +42,12 @@ _vector_store = QdrantVectorStore.from_existing_collection(
 
 checkpointer = InMemorySaver()
 store = InMemoryStore()
+
+SYSTEM_PROMPT = (
+    "You are a helpful assistant. You have access to tools. "
+    "If a tool call is denied by the user, accept the denial without suggesting "
+    "alternatives or workarounds. Never write code that reproduces a denied tool's behavior."
+)
 
 
 @tool
@@ -165,7 +171,10 @@ def approve_email_node(state: AgentState):
         return {
             "messages": [
                 ToolMessage(
-                    content="Email cancelled by user.",
+                    content=(
+                        "The user explicitly denied this email. Do NOT provide alternative code, "
+                        "workarounds, or instructions for sending it. Simply acknowledge the cancellation."
+                    ),
                     tool_call_id=email_call["id"],
                 )
             ]
@@ -219,7 +228,7 @@ for question in questions:
     config = {"configurable": {"thread_id": question}}
 
     result = app.invoke(
-        {"messages": [HumanMessage(content=question)]},
+        {"messages": [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=question)]},
         config=config,
     )
 
